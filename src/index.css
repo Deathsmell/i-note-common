@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+div .note {
+  position: page;
+  z-index: 1;
+  top: 5vh!important;
+  left: 5vw!important;
+  width: 90vw!important;
+  height: 90vh!important;
+  transition: all 450ms;
+}
