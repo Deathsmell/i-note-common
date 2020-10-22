@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const path = require('path')
 const http = require("http")
 const WebSocket = require('ws')
 const {sequelize, syncSequelize, Note, TypeMessage} = require('./model')
@@ -28,6 +29,14 @@ const dbHandler = async (data) => {
     return await reducer[note.type](note)
 }
 
+if (process.env.NODE_ENV === "production") {
+    console.log("production")
+    app.use('/', express.static(path.join(__dirname, 'build')))
+    app.get('*', ((req, res) => {
+        res.sendFile(path.join(__dirname, 'build', 'index.html'))
+    }))
+}
+
 const controller = (wss) => {
     wss.on('connection', async function connection(ws) {
         ws.on('message', async function incoming(data) {
@@ -50,11 +59,13 @@ const controller = (wss) => {
 
 (async () => {
     try {
-        if (process.env.DATABASE_URL === undefined) {
+        if (process.env.DATABASE_URL) {
             await syncSequelize(true)
             await sequelize.authenticate()
                 .then(() => console.log("Db connected ..."))
                 .catch(err => console.log("Error", err))
+        } else {
+            console.error("Doesnt find db url. Check env!!!")
         }
 
         const server = http.createServer(app)
