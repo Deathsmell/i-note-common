@@ -11,7 +11,7 @@ const dbHandler = async (data) => {
     console.log(note)
     const oldNote = await Note.findOne({where: {id: note.id}});
     if (oldNote) {
-        if (note.type === 'destroy') {
+        if (note.type === 'delete') {
             await oldNote.destroy()
         } else if (note.type === 'update') {
             return await oldNote.update({...note})

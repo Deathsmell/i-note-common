@@ -7,7 +7,6 @@ import {TypeMessage} from "./hooks/TypeMessage";
 
 const App = () => {
 
-
     const {defaultNote, updateNote} = useNote();
     const [notes, setNotes] = useState([]);
 
@@ -31,7 +30,6 @@ const App = () => {
                                   note={note}
                                   notes={notes}
                                   setNotes={setNotes}
-                                  serverText={note.text}
                                   connection={connection}
                             />
                         )

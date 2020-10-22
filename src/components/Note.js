@@ -11,12 +11,11 @@ const style = {
     background: "#f0f0f0",
 };
 
-const Note = ({note, noteIndex, serverText, notes, setNotes, connection}) => {
+const Note = ({note, noteIndex, notes, setNotes, connection}) => {
 
 
     const rnd = useRef();
     const [isDragging, setIsDragging] = useState(false);
-    const [text, setText] = useState(serverText);
     const {updateNote} = useNote();
 
     const updateStateNotes = (updatedNote) => {
@@ -35,15 +34,28 @@ const Note = ({note, noteIndex, serverText, notes, setNotes, connection}) => {
             width: ref.style.width,
             height: ref.style.height,
             x: position.x,
-            y: position.y
+            y: position.y,
         });
+        console.log(updatedNote);
         updateStateNotes(updatedNote)
         sendNewPosition(TypeMessage.UPDATE, updatedNote)
     }
 
     const deleteNoteHandler = () => {
-        // todo: create delete function on cross icon
-        console.log("Nothing to do")
+        sendNewPosition(TypeMessage.DELETE, note)
+        setNotes((prev) => [...prev.filter(noteFromState => noteFromState.id !== note.id)])
+    }
+
+    const changeColorHandler = (e) => {
+        const color = e.target.className.trim().replace(/^btn\s*/, '');
+        const updatedNote = updateNote(note, {color});
+        sendNewPosition(TypeMessage.UPDATE, updatedNote)
+    }
+
+    const changeTextHandler = (e) => {
+        const text = e.target.value;
+        const updatedNote = updateNote(note, {text});
+        sendNewPosition(TypeMessage.UPDATE, updatedNote)
     }
 
     return (
@@ -64,9 +76,15 @@ const Note = ({note, noteIndex, serverText, notes, setNotes, connection}) => {
                  style={{backgroundColor: notes[noteIndex].color || "gold"}}
             >
                 <div className="color-buttons">
-                    <button className="btn blue"/>
-                    <button className="btn btn-danger"/>
-                    <button className="btn btn-secondary"/>
+                    <button className="btn blue"
+                            onClick={changeColorHandler}
+                    />
+                    <button className="btn pink"
+                            onClick={changeColorHandler}
+                    />
+                    <button className="btn yellow"
+                            onClick={changeColorHandler}
+                    />
                 </div>
                 <div className="cross"
                      onClick={deleteNoteHandler}
@@ -76,9 +94,9 @@ const Note = ({note, noteIndex, serverText, notes, setNotes, connection}) => {
             </div>
             <textarea
                 className="note-text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onFocus={()=> setIsDragging(true)}
+                value={note.text}
+                onChange={changeTextHandler}
+                onFocus={() => setIsDragging(true)}
                 onBlur={() => setIsDragging(false)}
             />
         </Rnd>

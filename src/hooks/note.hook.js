@@ -12,6 +12,8 @@ const useNote = () => {
     }
 
     const updateNote = (oldNote,{id,width, height, x, y, color, text,type}) => {
+        if (typeof width === "string") width = width.replace(/px$/,'')
+        if (typeof height === "string") height = height.replace(/px$/,'')
         return {
             id: id || oldNote.id,
             width: width || oldNote.width,
