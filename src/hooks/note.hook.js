@@ -11,9 +11,9 @@ const useNote = () => {
         color: '',
     }
 
-    const updateNote = (oldNote,{id,width, height, x, y, color, text,type}) => {
-        if (typeof width === "string") width = width.replace(/px$/,'')
-        if (typeof height === "string") height = height.replace(/px$/,'')
+    const updateNote = (oldNote, {id, width, height, x, y, color, text, type}) => {
+        if (typeof width === "string") width = width.replace(/px$/, '')
+        if (typeof height === "string") height = height.replace(/px$/, '')
         return {
             id: id || oldNote.id,
             width: width || oldNote.width,
@@ -26,7 +26,16 @@ const useNote = () => {
         }
     }
 
-    return {updateNote,defaultNote}
+    const isEqual = (oldNote, updatedNote) => {
+        return (oldNote.width === updatedNote.width)
+            && (oldNote.height === updatedNote.height)
+            && (oldNote.x === updatedNote.x)
+            && (oldNote.y === updatedNote.y)
+            && (oldNote.color === updatedNote.color)
+            && (oldNote.text === updatedNote.text)
+    }
+
+    return {updateNote, defaultNote,isEqual}
 }
 
 export default useNote

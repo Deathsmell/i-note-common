@@ -9,12 +9,15 @@ const App = () => {
 
     const {defaultNote, updateNote} = useNote();
     const [notes, setNotes] = useState([]);
+    const [focus, setFocus] = useState(false);
 
     const {connection} = useWS(notes, setNotes);
 
     const createHandler = (e) => {
-        const newNote = updateNote(defaultNote, {x: e.clientX, y: e.clientY, type: TypeMessage.CREATE});
-        connection.send(JSON.stringify(newNote))
+        if (!focus) {
+            const newNote = updateNote(defaultNote, {x: e.clientX, y: e.clientY, type: TypeMessage.CREATE});
+            connection.send(JSON.stringify(newNote))
+        }
     }
 
     return (
@@ -25,12 +28,15 @@ const App = () => {
                 notes &&
                 notes.map((note, index) => {
                         return (
-                            <Note key={index}
+                            <Note key={note.id}
                                   noteIndex={index}
                                   note={note}
                                   notes={notes}
+                                  focus={focus}
+                                  setFocus={setFocus}
                                   setNotes={setNotes}
                                   connection={connection}
+                                  color={note.color}
                             />
                         )
                     }

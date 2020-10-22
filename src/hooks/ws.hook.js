@@ -8,7 +8,7 @@ const useWS = (notes, setNotes) => {
 
     const update = useCallback((serverNote) => {
         setNotes((prev) => [...prev.filter(note => note.id !== serverNote.id), serverNote])
-    }, [setNotes])
+    }, [ setNotes])
 
     const reducer = useCallback((note, action) => {
         switch (action) {
@@ -25,7 +25,7 @@ const useWS = (notes, setNotes) => {
                     console.error('Incorrect data message', action, note)
                 }
         }
-    }, [ setNotes, update])
+    }, [setNotes, update])
 
     const updatePosition = useCallback(({data}) => {
         if (data) {
