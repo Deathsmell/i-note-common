@@ -7,14 +7,11 @@ import {TypeMessage} from "./hooks/TypeMessage";
 
 const App = () => {
 
-    const {defaultNote, updateNote} = useNote();
-    const notesState = useState([]);
-    const [notes, setNotes] = notesState;
-    const {connection} = useWS(notesState);
 
-    // useEffect(() => {
-    //     console.log(notes.length);
-    // }, [notes])
+    const {defaultNote, updateNote} = useNote();
+    const [notes, setNotes] = useState([]);
+
+    const {connection} = useWS(notes, setNotes);
 
     const createHandler = (e) => {
         const newNote = updateNote(defaultNote, {x: e.clientX, y: e.clientY, type: TypeMessage.CREATE});
@@ -22,24 +19,24 @@ const App = () => {
     }
 
     return (
-        <div style={{backgroundColor: "aqua", width: "100vw", height: '100vh', cursor:'pointer'}}
+        <div style={{backgroundColor: "aqua", width: "100vw", height: '100vh', cursor: 'pointer'}}
              onDoubleClick={createHandler}
         >
-            {notes.length !== 0 &&
-            notes.map((note, index) => {
-                    return (
-                        <Note key={index}
-                              noteIndex={index}
-                              note={note}
-                              noteId={note.id}
-                              notes={notes}
-                              setNotes={setNotes}
-                              serverText={note.text}
-                              connection={connection}
-                        />
-                    )
-                }
-            )
+            {
+                notes &&
+                notes.map((note, index) => {
+                        return (
+                            <Note key={index}
+                                  noteIndex={index}
+                                  note={note}
+                                  notes={notes}
+                                  setNotes={setNotes}
+                                  serverText={note.text}
+                                  connection={connection}
+                            />
+                        )
+                    }
+                )
             }
         </div>
     )

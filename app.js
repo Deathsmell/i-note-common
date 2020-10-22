@@ -12,31 +12,39 @@ const dbHandler = async (data) => {
     const oldNote = await Note.findOne({where: {id: note.id}});
     if (oldNote) {
         if (note.type === 'destroy') {
-            console.log('destroy',note)
             await oldNote.destroy()
         } else if (note.type === 'update') {
-            console.log('update',note)
-            await oldNote.update({...note})
+            return await oldNote.update({...note})
         }
     } else {
-        console.log('create',note)
-        await Note.create(note)
+        const newNote = await Note.create(note);
+        if (newNote.type) {
+            return newNote;
+        } else {
+            console.error(newNote)
+        }
     }
 }
 
 const controller = (wss) => {
     wss.on('connection', async function connection(ws) {
         console.log('Connected user')
-        ws.on('message', function incoming(data) {
-            console.log('receive message')
-            dbHandler(data)
-            wss.clients.forEach(function each(client) {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(data);
-                }
-            });
+        ws.on('message', async function incoming(data) {
+            console.log('receive message',data)
+                const update = await dbHandler(data);
+                wss.clients.forEach(function each(client) {
+                        if (client.readyState === WebSocket.OPEN) {
+                            if (update) {
+                                client.send(JSON.stringify(update));
+                            } else {
+                                client.send(data)
+                            }
+                        }
+                    }
+                )
         });
         const notes = await Note.findAll();
+        console.log('send initial', notes)
         ws.send(JSON.stringify(notes))
     });
 }
@@ -64,9 +72,11 @@ const controller = (wss) => {
     }
 })()
 
-// app.get('/', (req, res) => {
-//     res.send('Hello World!')
-// })
+app.get('/getNotes', (req, res) => {
+    Note.findAll().then(notes => {
+        res.send(JSON.stringify(notes))
+    })
+})
 //
 // app.listen(PORT, () => {
 //     console.log(`Example app listening at http://localhost:${PORT}`)

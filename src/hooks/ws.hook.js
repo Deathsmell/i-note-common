@@ -1,71 +1,32 @@
-import {useEffect, useState} from "react";
-import useLocal from "./local.hook";
+import {useCallback, useEffect, useState} from "react";
 import {TypeMessage} from "./TypeMessage";
 
 
-const useWS = ([notes, setNotes]) => {
+const useWS = (notes, setNotes) => {
 
     const [connection, setConnection] = useState(null);
-    const {saveInLocal, getFromLocal, removeInLocal} = useLocal();
 
-    const compare = (localNote, serverNote) => localNote.x === serverNote.x
-        && localNote.y === serverNote.y
-        && localNote.width === serverNote.width
-        && localNote.height === serverNote.height
+    const update = useCallback((serverNote) => {
+        setNotes((prev) => [...prev.filter(note => note.id !== serverNote.id), serverNote])
+    },[setNotes])
 
-
-    function setArrayNotes(serverNote) {
-        serverNote.forEach(note => {
-            saveInLocal(note.id, JSON.stringify(note))
-        })
-        setNotes(serverNote)
-    }
-
-    function update(serverNote, data) {
-        saveInLocal(serverNote.id, data)
-        const index = notes.findIndex(note => note.id === serverNote.id);
-        const fromLocal = getFromLocal(serverNote.id);
-        const parse = JSON.parse(fromLocal);
-        if (!compare(parse, serverNote)) {
-            notes[index] = serverNote
-            setNotes([...notes])
-        }
-    }
-
-    const updatePosition = ({data}) => {
+    const updatePosition = useCallback(({data}) => {
         if (data) {
             const respNote = JSON.parse(data);
-            //todo: rewrite on reduce method
             if (!respNote.type && Array.isArray(respNote)) {
-                setArrayNotes(respNote);
-                return;
-            }
-            if (respNote.type === TypeMessage.UPDATE) {
-                update(respNote, data);
-            } else if (respNote.type === TypeMessage.CREATE) {
-                setNotes([...notes, respNote])
+                setNotes(() => respNote)
+            } else if (respNote.type === TypeMessage.UPDATE || respNote.type === TypeMessage.CREATE) {
+                update(respNote);
             } else if (respNote.type === TypeMessage.DELETE) {
-                removeInLocal(respNote.id)
                 setNotes(notes.filter(note => note.id !== respNote.id))
-            } else {
+            } else if (respNote.type) {
                 console.error('Incorrect data message', data)
             }
         }
-    }
+    },[notes,setNotes,update])
 
-    // const getPositions = ({data}) => {
-    //     console.log("get positions", data)
-    //     if (data) {
-    //         const serverNotes = JSON.parse(data);
-    //         setNotes(serverNotes)
-    //         serverNotes.forEach(note => {
-    //             saveInLocal(note.id, note)
-    //         })
-    //     }
-    // }
-
-    const test = (data) => {
-        console.log(data)
+    const connected = () => {
+        console.log("connected")
     }
 
     useEffect(() => {
@@ -76,10 +37,10 @@ const useWS = ([notes, setNotes]) => {
             console.log(url)
             const webSocket = new WebSocket(url)
             webSocket.onmessage = updatePosition
-            webSocket.onopen = test
+            webSocket.onopen = connected
             setConnection(webSocket)
         }
-    }, [connection])
+    }, [connection,updatePosition])
 
     return {connection}
 }
