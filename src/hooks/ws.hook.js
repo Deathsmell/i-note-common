@@ -14,30 +14,39 @@ const useWS = ([notes, setNotes]) => {
         && localNote.height === serverNote.height
 
 
+    function setArrayNotes(serverNote) {
+        serverNote.forEach(note => {
+            saveInLocal(note.id, JSON.stringify(note))
+        })
+        setNotes(serverNote)
+    }
+
+    function update(serverNote, data) {
+        saveInLocal(serverNote.id, data)
+        const index = notes.findIndex(note => note.id === serverNote.id);
+        const fromLocal = getFromLocal(serverNote.id);
+        const parse = JSON.parse(fromLocal);
+        if (!compare(parse, serverNote)) {
+            notes[index] = serverNote
+            setNotes([...notes])
+        }
+    }
+
     const updatePosition = ({data}) => {
         if (data) {
-            const serverNote = JSON.parse(data);
-            if (!serverNote.type && serverNote) {
-                serverNote.forEach(note => {
-                    saveInLocal(note.id, JSON.stringify(note))
-                })
-                setNotes(serverNote)
+            const respNote = JSON.parse(data);
+            //todo: rewrite on reduce method
+            if (!respNote.type && Array.isArray(respNote)) {
+                setArrayNotes(respNote);
                 return;
             }
-            saveInLocal(serverNote.id, data)
-            const index = notes.findIndex(note => note.id === serverNote.id);
-            if (serverNote.type === TypeMessage.UPDATE) {
-                const fromLocal = getFromLocal(serverNote.id);
-                const parse = JSON.parse(fromLocal);
-                if (!compare(parse, serverNote)) {
-                    notes[index] = serverNote
-                    setNotes([...notes])
-                }
-            } else if (serverNote.type === TypeMessage.CREATE) {
-                setNotes([...notes, serverNote])
-            } else if (serverNote.type === TypeMessage.DELETE) {
-                removeInLocal(serverNote.id)
-                setNotes(notes.filter(note => note.id !== serverNote.id))
+            if (respNote.type === TypeMessage.UPDATE) {
+                update(respNote, data);
+            } else if (respNote.type === TypeMessage.CREATE) {
+                setNotes([...notes, respNote])
+            } else if (respNote.type === TypeMessage.DELETE) {
+                removeInLocal(respNote.id)
+                setNotes(notes.filter(note => note.id !== respNote.id))
             } else {
                 console.error('Incorrect data message', data)
             }
@@ -61,7 +70,11 @@ const useWS = ([notes, setNotes]) => {
 
     useEffect(() => {
         if (connection === null) {
-            const webSocket = new WebSocket('ws://localhost:8080');
+            const url = window.location.href
+                .replace(/^http/, 'ws')
+                .replace(/3000\/$/, '5000/');
+            console.log(url)
+            const webSocket = new WebSocket(url)
             webSocket.onmessage = updatePosition
             webSocket.onopen = test
             setConnection(webSocket)

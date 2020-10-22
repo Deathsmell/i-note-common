@@ -127,7 +127,6 @@ const Note = ({note,noteIndex, noteId, serverText, notes, setNotes, connection})
                     : (
                         <div className="note-body"
                              style={{backgroundColor: notes[noteIndex].color || "grey"}}
-                             onDoubleClick={() => setTransformNote(true)}
                         >
                             {text}
                         </div>

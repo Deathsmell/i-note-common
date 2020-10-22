@@ -3,7 +3,6 @@ module.exports = (sequelize,DataTypes) => {
         width: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            unique: true,
         },
         height: {
             type: DataTypes.INTEGER,

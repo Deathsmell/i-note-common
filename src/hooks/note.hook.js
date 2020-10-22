@@ -1,7 +1,7 @@
 const useNote = () => {
 
     const defaultNote = {
-        id: 0,
+        id: null,
         text: '',
         width: 200,
         height: 200,
@@ -11,7 +11,7 @@ const useNote = () => {
         color: '',
     }
 
-    const updateNote = (oldNote,{id,width, height, x, y, color, text}) => {
+    const updateNote = (oldNote,{id,width, height, x, y, color, text,type}) => {
         return {
             id: id || oldNote.id,
             width: width || oldNote.width,
@@ -20,6 +20,7 @@ const useNote = () => {
             y: ~y ? y : oldNote.y,
             color: color || oldNote.color,
             text: text || oldNote.text,
+            type: type || null
         }
     }
 
