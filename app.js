@@ -2,51 +2,50 @@ const express = require('express')
 const app = express()
 const http = require("http")
 const WebSocket = require('ws')
-const {sequelize, syncSequelize, Note} = require('./model')
+const {sequelize, syncSequelize, Note, TypeMessage} = require('./model')
 
 const PORT = process.env.PORT || 5000;
 
+const reducer = {
+    [TypeMessage.CREATE]: async (note) => {
+        const newNote = await Note.create(note);
+        return newNote.type ? newNote : console.error(newNote)
+    },
+    [TypeMessage.UPDATE]: async (note) =>{
+        const oldNote = await Note.findOne({where: {id: note.id}});
+        return await oldNote.update({...note})
+    },
+    [TypeMessage.DELETE]: async (note) =>{
+        await Note.destroy({where:{id: note.id}})
+    },
+    [null]: async (note) =>{
+        console.log("Error. Type equal null", note)
+    }
+}
+
 const dbHandler = async (data) => {
     const note = JSON.parse(data);
-    console.log(note)
-    const oldNote = await Note.findOne({where: {id: note.id}});
-    if (oldNote) {
-        if (note.type === 'delete') {
-            await oldNote.destroy()
-        } else if (note.type === 'update') {
-            return await oldNote.update({...note})
-        }
-    } else {
-        const newNote = await Note.create(note);
-        if (newNote.type) {
-            return newNote;
-        } else {
-            console.error(newNote)
-        }
-    }
+    return await reducer[note.type](note)
 }
 
 const controller = (wss) => {
     wss.on('connection', async function connection(ws) {
-        console.log('Connected user')
         ws.on('message', async function incoming(data) {
-            console.log('receive message',data)
-                const update = await dbHandler(data);
-                wss.clients.forEach(function each(client) {
-                        if (client.readyState === WebSocket.OPEN) {
-                            if (update) {
-                                client.send(JSON.stringify(update));
-                            } else {
-                                client.send(data)
-                            }
+            const update = await dbHandler(data);
+            wss.clients.forEach(function each(client) {
+                    if (client.readyState === WebSocket.OPEN) {
+                        if (update) {
+                            client.send(JSON.stringify(update));
+                        } else {
+                            client.send(data)
                         }
                     }
-                )
-        });
+                }
+            )
+        })
         const notes = await Note.findAll();
-        console.log('send initial', notes)
         ws.send(JSON.stringify(notes))
-    });
+    })
 }
 
 (async () => {

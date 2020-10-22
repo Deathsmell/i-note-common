@@ -21,7 +21,7 @@ const useNote = () => {
             x: ~x ? x : oldNote.x,
             y: ~y ? y : oldNote.y,
             color: color || oldNote.color,
-            text: text || oldNote.text,
+            text: text || oldNote.text || ' ',
             type: type || null
         }
     }

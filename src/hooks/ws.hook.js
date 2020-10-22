@@ -8,22 +8,31 @@ const useWS = (notes, setNotes) => {
 
     const update = useCallback((serverNote) => {
         setNotes((prev) => [...prev.filter(note => note.id !== serverNote.id), serverNote])
-    },[setNotes])
+    }, [setNotes])
+
+    const reducer = useCallback((note, action) => {
+        switch (action) {
+            case TypeMessage.CREATE:
+                return update(note)
+            case TypeMessage.UPDATE:
+                return update(note)
+            case TypeMessage.DELETE:
+                return setNotes((prev) => [...prev.filter(noteFromState => noteFromState.id !== note.id)])
+            default:
+                if (Array.isArray(note)) {
+                    setNotes(() => note)
+                } else {
+                    console.error('Incorrect data message', action, note)
+                }
+        }
+    }, [ setNotes, update])
 
     const updatePosition = useCallback(({data}) => {
         if (data) {
             const respNote = JSON.parse(data);
-            if (!respNote.type && Array.isArray(respNote)) {
-                setNotes(() => respNote)
-            } else if (respNote.type === TypeMessage.UPDATE || respNote.type === TypeMessage.CREATE) {
-                update(respNote);
-            } else if (respNote.type === TypeMessage.DELETE) {
-                setNotes(notes.filter(note => note.id !== respNote.id))
-            } else if (respNote.type) {
-                console.error('Incorrect data message', data)
-            }
+            reducer(respNote, respNote.type)
         }
-    },[notes,setNotes,update])
+    }, [reducer])
 
     const connected = () => {
         console.log("connected")
@@ -40,7 +49,7 @@ const useWS = (notes, setNotes) => {
             webSocket.onopen = connected
             setConnection(webSocket)
         }
-    }, [connection,updatePosition])
+    }, [connection, updatePosition])
 
     return {connection}
 }

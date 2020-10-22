@@ -1,22 +1,19 @@
-import React, {useRef, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {Rnd} from "react-rnd"
 import useNote from "../hooks/note.hook";
 import {TypeMessage} from "../hooks/TypeMessage";
 
-const style = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "solid 1px #ddd",
-    background: "#f0f0f0",
-};
-
 const Note = ({note, noteIndex, notes, setNotes, connection}) => {
 
-
-    const rnd = useRef();
     const [isDragging, setIsDragging] = useState(false);
+    const [zIndex, setZIndex] = useState(1);
     const {updateNote} = useNote();
+
+    useEffect(()=>{
+        return () => {
+            setZIndex(1)
+        }
+    })
 
     const updateStateNotes = (updatedNote) => {
         setNotes((prev) => [...prev.filter(note => note.id !== updatedNote.id), updatedNote])
@@ -60,10 +57,9 @@ const Note = ({note, noteIndex, notes, setNotes, connection}) => {
 
     return (
         <Rnd
-            ref={rnd}
             className="note"
             disableDragging={isDragging}
-            style={{...style}}
+            style={{zIndex: zIndex}}
             size={{width: notes[noteIndex].width, height: notes[noteIndex].height}}
             minWidth={250}
             minHeight={250}
@@ -72,33 +68,34 @@ const Note = ({note, noteIndex, notes, setNotes, connection}) => {
             onResizeStop={onResizeStopHandler}
             bounds={"window"}
         >
-            <div className="note-header"
-                 style={{backgroundColor: notes[noteIndex].color || "gold"}}
-            >
-                <div className="color-buttons">
-                    <button className="btn blue"
-                            onClick={changeColorHandler}
-                    />
-                    <button className="btn pink"
-                            onClick={changeColorHandler}
-                    />
-                    <button className="btn yellow"
-                            onClick={changeColorHandler}
-                    />
-                </div>
-                <div className="cross"
-                     onClick={deleteNoteHandler}
+                <div className="note-header"
+                     style={{backgroundColor: notes[noteIndex].color || "gold"}}
+                     onClick={() => setZIndex(2)}
                 >
-                    &times;
+                    <div className="color-buttons">
+                        <button className="btn blue"
+                                onClick={changeColorHandler}
+                        />
+                        <button className="btn pink"
+                                onClick={changeColorHandler}
+                        />
+                        <button className="btn yellow"
+                                onClick={changeColorHandler}
+                        />
+                    </div>
+                    <div className="cross"
+                         onClick={deleteNoteHandler}
+                    >
+                        &times;
+                    </div>
                 </div>
-            </div>
-            <textarea
-                className="note-text"
-                value={note.text}
-                onChange={changeTextHandler}
-                onFocus={() => setIsDragging(true)}
-                onBlur={() => setIsDragging(false)}
-            />
+                <textarea
+                    className="note-text"
+                    value={note.text}
+                    onChange={changeTextHandler}
+                    onFocus={() => setIsDragging(true)}
+                    onBlur={() => setIsDragging(false)}
+                />
         </Rnd>
     )
 }

@@ -12,24 +12,21 @@ code {
     monospace;
 }
 
+div .workspace {
+    background-color: #e6e6e6;
+    width: 100vw;
+    height: 100vh;
+    cursor: pointer;
+}
 
 div .note {
     position: absolute;
-    z-index: 1;
-    display: flex;
     flex-direction: column;
-}
-
-div .note-activate {
     display: flex;
-    flex-direction: column;
-    position: absolute;
-    z-index: 1;
-    top: 5vh !important;
-    left: 5vw !important;
-    width: 90vw !important;
-    height: 90vh !important;
-    transition: height 450ms, width 450ms, top 450ms, left 450ms;
+    align-items: center;
+    justify-content: center;
+    border: solid 1px #ddd;
+    background: #f0f0f0;
 }
 
 div .note-header {
@@ -65,12 +62,15 @@ div.color-buttons > button {
     align-self: center;
     margin-left: 5px;
 }
+
 div.color-buttons > button.blue {
     background-color: #42aaff;
 }
+
 div.color-buttons > button.pink {
     background-color: #fb607f;
 }
+
 div.color-buttons > button.yellow {
     background-color: yellow;
 }

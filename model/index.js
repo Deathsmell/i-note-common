@@ -22,8 +22,10 @@ const syncSequelize = (sync) => {
 
 const Note = require('./Note')(sequelize, DataTypes);
 
+const TypeMessage = require('./TypeMessage');
 module.exports = {
     Note,
     sequelize,
-    syncSequelize
+    syncSequelize,
+    TypeMessage
 }

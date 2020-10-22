@@ -18,7 +18,7 @@ const App = () => {
     }
 
     return (
-        <div style={{backgroundColor: "aqua", width: "100vw", height: '100vh', cursor: 'pointer'}}
+        <div className="workspace"
              onDoubleClick={createHandler}
         >
             {
